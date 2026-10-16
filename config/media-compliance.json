@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 2,
+  "ffmpeg": {
+    "provider": "BtbN/FFmpeg-Builds",
+    "binaryVersion": "n8.1.3-14-g330caae0c1-20261004",
+    "sourceRevision": "330caae0c1",
+    "buildRelease": "autobuild-2026-10-04-20-51",
+    "platform": "win32-x64",
+    "variant": "lgpl-shared",
+    "license": "LGPL-3.0-or-later",
+    "archiveName": "ffmpeg-n8.1.3-14-g330caae0c1-win64-lgpl-shared-8.1.zip",
+    "archiveUrl": "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-10-04-20-51/ffmpeg-n8.1.3-14-g330caae0c1-win64-lgpl-shared-8.1.zip",
+    "archiveSha256": "68d53cc84f716c02853e2ea3ff5f1beaea590646cb6831e0a646d22208c97a83",
+    "runtimeDirectory": "vendor/ffmpeg-runtime",
+    "sourceBundle": {
+      "artifactName": "neonvix-ffmpeg-source-n8.1.3-14-g330caae0c1.tar.gz",
+      "evidenceManifest": "artifacts/ffmpeg-source/SOURCE_MANIFEST.json",
+      "buildCommand": "./makeimage.sh win64 lgpl-shared 8.1 && ./build.sh win64 lgpl-shared 8.1",
+      "components": [
+        {
+          "name": "FFmpeg",
+          "revision": "330caae0c1",
+          "archiveName": "FFmpeg-330caae0c1.zip",
+          "url": "https://github.com/FFmpeg/FFmpeg/archive/330caae0c1.zip",
+          "sha256": "632a9dd587973bc19c9e601707d9b62e9305db7e6db8b0db78bc46797334d0d8"
+        },
+        {
+          "name": "BtbN FFmpeg-Builds",
+          "revision": "9acad4a9ef1583096af7836cc1e9c8cbcb4d3950",
+          "archiveName": "FFmpeg-Builds-9acad4a9ef1583096af7836cc1e9c8cbcb4d3950.zip",
+          "url": "https://github.com/BtbN/FFmpeg-Builds/archive/9acad4a9ef1583096af7836cc1e9c8cbcb4d3950.zip",
+          "sha256": "6831eeef008b5955da5710900f74cac77b11a780058a283efc5d354a0e96e390"
+        }
+      ]
+    },
+    "runtimeFiles": {
+      "LICENSE.txt": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768",
+      "bin/avcodec-62.dll": "9c4a9e1117965467b5f10a733afd0a23b1d2a3a867249012086bff2a19604800",
+      "bin/avdevice-62.dll": "f2ffc54d0288460e44c2bbecef03487abb1b071188a3a46f432d85283435ee5c",
+      "bin/avfilter-11.dll": "633d67dbee430a9d1c2407ae350e7ca30b41260e90e871ec87b7bbb1ce56a334",
+      "bin/avformat-62.dll": "46572cb51c815434e02dc49158250fec791e7b6bca1bdfd19a9007b9cade882f",
+      "bin/avutil-60.dll": "70f7e817b6021da8665b98c6af580fd62b4c8540714130679a5c09432763bf8b",
+      "bin/ffmpeg.exe": "f2542f5e4a2ec410e048145a93958bf5b92ccda4d288da51021d73bad53c1aa4",
+      "bin/ffprobe.exe": "7ca0370b254f0fa6ed33f0415bea2117bcb2958d5cae6f8718929b582edce062",
+      "bin/swresample-6.dll": "21433180f650dd9bcdea21c7fc896bbc5fc9a4dd7b93784f8fa937f7d3006ee4",
+      "bin/swscale-9.dll": "8b09eacc88ef30136e37654fc9c309b4bff87380dbddbc9e69c1667e389e60ad"
+    }
+  }
+}

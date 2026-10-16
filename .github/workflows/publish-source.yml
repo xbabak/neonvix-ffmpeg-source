@@ -1,0 +1,91 @@
+name: Publish FFmpeg source
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Neonvix version tag this FFmpeg build ships with (for example v0.3.0)
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Refuse to overwrite an existing release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; releases are immutable." >&2
+            exit 1
+          fi
+
+      - name: Collect complete FFmpeg corresponding source
+        run: node scripts/prepareMediaSource.cjs
+
+      - name: Download and verify the exact FFmpeg runtime archive
+        run: |
+          set -euo pipefail
+          url=$(node -p "require('./config/media-compliance.json').ffmpeg.archiveUrl")
+          name=$(node -p "require('./config/media-compliance.json').ffmpeg.archiveName")
+          expected=$(node -p "require('./config/media-compliance.json').ffmpeg.archiveSha256")
+          mkdir -p release
+          curl -fsSL --retry 3 -o "release/$name" "$url"
+          echo "$expected  $name" > "release/$name.sha256"
+          (cd release && sha256sum -c "$name.sha256")
+
+      - name: Split the source archive under GitHub's 2 GiB asset limit
+        run: |
+          set -euo pipefail
+          name=$(node -p "require('./config/media-compliance.json').ffmpeg.sourceBundle.artifactName")
+          src="artifacts/ffmpeg-source/$name"
+          (cd artifacts/ffmpeg-source && sha256sum -c "$name.sha256")
+          cp "artifacts/ffmpeg-source/$name.sha256" artifacts/ffmpeg-source/SOURCE_MANIFEST.json release/
+          size=$(stat -c %s "$src")
+          if [ "$size" -gt 2000000000 ]; then
+            split -b 1900M -d -a 2 "$src" "release/$name.part"
+            rm "$src"
+            (cd release && cat "$name".part* | sha256sum | awk '{print $1}' | grep -qx "$(awk '{print $1}' "$name.sha256")")
+          else
+            mv "$src" release/
+          fi
+          ls -l release
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          binary=$(node -p "require('./config/media-compliance.json').ffmpeg.binaryVersion")
+          name=$(node -p "require('./config/media-compliance.json').ffmpeg.sourceBundle.artifactName")
+          cat > notes.md <<EOF
+          Complete corresponding source for FFmpeg \`$binary\` (BtbN \`win64-lgpl-shared\`), as included in Neonvix IPTV Player ${TAG#v} on the Microsoft Store. FFmpeg is licensed under the GNU LGPL version 3 or later. Neonvix does not modify FFmpeg.
+
+          **Files**
+          - \`$name\`: FFmpeg source, the pinned BtbN build scripts and patches, the source of every bundled library, and \`SOURCE_MANIFEST.json\` (also attached separately). Large archives are split into \`.partNN\` pieces.
+          - The exact FFmpeg runtime ZIP that Neonvix ships.
+          - \`.sha256\` checksums for both archives.
+
+          **Rejoin split pieces**
+          - Linux/macOS: \`cat $name.part* > $name && sha256sum -c $name.sha256\`
+          - Windows (Command Prompt): \`copy /b $name.part00+$name.part01 $name\` (add further parts in order), then \`certutil -hashfile $name SHA256\`
+          EOF
+          sed -i 's/^          //' notes.md
+          gh release create "$TAG" release/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "FFmpeg source for Neonvix IPTV Player ${TAG#v}" \
+            --notes-file notes.md \
+            --latest

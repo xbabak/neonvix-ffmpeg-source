@@ -16,6 +16,12 @@ matches one Neonvix version and contains:
   archive that Neonvix ships.
 - `.sha256` checksum files for both archives.
 
+Large source archives are split into `.partNN` pieces (GitHub limits files to 2 GiB);
+the release notes explain how to rejoin and verify them.
+
+The archive is produced by `scripts/prepareMediaSource.cjs` from the pins in
+`config/media-compliance.json` through the **Publish FFmpeg source** workflow.
+
 Neonvix's own application code is proprietary and is not published here. It runs
 FFmpeg as a separate program and does not modify FFmpeg.
 
